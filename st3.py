@@ -26,7 +26,7 @@ st.set_page_config(page_title="Scheme Matcher", layout="wide")
 
 try:
     client = OpenAI(
-        api_key=os.getenv("OPEN_AI_KEY"),
+        api_key=st.secrets["OPEN_AI_KEY"],
         proxies=None
     )
 except (KeyError, TypeError, ValueError) as e:
@@ -39,10 +39,10 @@ except (KeyError, TypeError, ValueError) as e:
 # DB_PASSWORD_OLD = st.secrets["database"]["password"]
 # DB_DATABASE_OLD = st.secrets["database"]["database"]
 
-DB_HOST_OLD = os.getenv("HOST")
-DB_USER_OLD = os.getenv("USER")
-DB_PASSWORD_OLD = os.getenv("PASSWORD")
-DB_DATABASE_OLD = os.getenv("DATABASE")
+DB_HOST_OLD = st.secrets["HOST"]
+DB_USER_OLD = st.secrets["USER"]
+DB_PASSWORD_OLD = st.secrets["PASSWORD"]
+DB_DATABASE_OLD = st.secrets["DATABASE"]
 
 @st.cache_data(show_spinner=True, ttl=3600)  # Cache for 1 hour
 def fetch_data():
