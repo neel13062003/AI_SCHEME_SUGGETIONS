@@ -24,6 +24,7 @@ st.set_page_config(page_title="Scheme Matcher", layout="wide")
 #         st.error("⚠️ OpenAI API key not found. Please set it in Streamlit secrets or environment variables.")
 #         st.stop()
 openai_api_key = st.secrets["OPEN_AI_KEY"]
+st.write("api key",openai_api_key)
 try:
     client = OpenAI(
         api_key=openai_api_key,
@@ -34,10 +35,6 @@ except (KeyError, TypeError, ValueError) as e:
     st.stop()
 
 
-# DB_HOST_OLD = st.secrets["database"]["host"]
-# DB_USER_OLD = st.secrets["database"]["user"]
-# DB_PASSWORD_OLD = st.secrets["database"]["password"]
-# DB_DATABASE_OLD = st.secrets["database"]["database"]
 
 DB_HOST_OLD = st.secrets["HOST"]
 DB_USER_OLD = st.secrets["USER"]
