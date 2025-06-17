@@ -28,7 +28,7 @@ st.set_page_config(page_title="Scheme Matcher", layout="wide")
 
 try:
     client = OpenAI(
-        api_key=st.secrets["api_keys"]["openai"],
+        api_key=st.secrets["database"]["openai"],
         proxies=None
     )
 except (KeyError, TypeError, ValueError) as e:
