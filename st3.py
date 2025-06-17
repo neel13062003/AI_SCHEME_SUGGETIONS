@@ -27,8 +27,7 @@ openai_api_key = st.secrets["OPEN_AI_KEY"]
 # st.write("api key",openai_api_key)
 try:
     client = OpenAI(
-        api_key=openai_api_key,
-        proxies=None
+        api_key=openai_api_key
     )
 except (KeyError, TypeError, ValueError) as e:
     st.error("⚠️ 1OpenAI API key not found or invalid. Please set it in Streamlit secrets or environment variables.")
@@ -504,7 +503,7 @@ User Query: "{user_query}"
                 # Initialize OpenAI client explicitly with proxies=None for version 1.50.2
                 
                 client = OpenAI(
-                    api_key=st.secrets["api_keys"]["openai"],
+                    api_key=st.secrets["OPEN_AI_KEY"],
                     proxies=None  # Explicitly disable proxies to avoid the error
                 )
 
