@@ -6,10 +6,10 @@ from openai import OpenAI
 import json
 import pymysql
 import os
-from dotenv import loadenv
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
-
+load_dotenv()
 # -------------------------------
 # Configuration
 # -------------------------------
