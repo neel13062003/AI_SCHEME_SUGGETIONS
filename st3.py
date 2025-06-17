@@ -32,7 +32,7 @@ try:
         proxies=None
     )
 except (KeyError, TypeError, ValueError) as e:
-    st.error("⚠️ OpenAI API key not found or invalid. Please set it in Streamlit secrets or environment variables.")
+    st.error("⚠️ 1OpenAI API key not found or invalid. Please set it in Streamlit secrets or environment variables.")
     st.stop()
 
 
