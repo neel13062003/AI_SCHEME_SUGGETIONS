@@ -6,11 +6,9 @@ from openai import OpenAI
 import json
 import pymysql
 import os
+from dotenv import loadenv
 from sqlalchemy import create_engine
 
-
-
-API = st.secrets["api_keys"]["openai"]
 
 # -------------------------------
 # Configuration
@@ -28,7 +26,7 @@ st.set_page_config(page_title="Scheme Matcher", layout="wide")
 
 try:
     client = OpenAI(
-        api_key=st.secrets["database"]["openai"],
+        api_key=os.getenv("OPEN_AI_KEY"),
         proxies=None
     )
 except (KeyError, TypeError, ValueError) as e:
@@ -36,11 +34,15 @@ except (KeyError, TypeError, ValueError) as e:
     st.stop()
 
 
-DB_HOST_OLD = st.secrets["database"]["host"]
-DB_USER_OLD = st.secrets["database"]["user"]
-DB_PASSWORD_OLD = st.secrets["database"]["password"]
-DB_DATABASE_OLD = st.secrets["database"]["database"]
+# DB_HOST_OLD = st.secrets["database"]["host"]
+# DB_USER_OLD = st.secrets["database"]["user"]
+# DB_PASSWORD_OLD = st.secrets["database"]["password"]
+# DB_DATABASE_OLD = st.secrets["database"]["database"]
 
+DB_HOST_OLD = os.getenv("HOST")
+DB_USER_OLD = os.getenv("USER")
+DB_PASSWORD_OLD = os.getenv("PASSWORD")
+DB_DATABASE_OLD = os.getenv("DATABASE")
 
 @st.cache_data(show_spinner=True, ttl=3600)  # Cache for 1 hour
 def fetch_data():
