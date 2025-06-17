@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 import re
 from itertools import product
-import openai
+# import openai
+from openai import OpenAI
 import json
 import pymysql
 import os
@@ -11,20 +12,20 @@ from sqlalchemy import create_engine
 
 
 API = st.secrets["api_keys"]["openai"]
-
+client = OpenAI(api_key=API)
 # -------------------------------
 # Configuration
 # -------------------------------
 st.set_page_config(page_title="Scheme Matcher", layout="wide")
 
-# Use environment variable or Streamlit secrets for API key
-try:
-    openai.api_key = API
-except:
-    openai.api_key = API
-    if not openai.api_key:
-        st.error("⚠️ OpenAI API key not found. Please set it in Streamlit secrets or environment variables.")
-        st.stop()
+# # Use environment variable or Streamlit secrets for API key
+# try:
+#     openai.api_key = API
+# except:
+#     openai.api_key = API
+#     if not openai.api_key:
+#         st.error("⚠️ OpenAI API key not found. Please set it in Streamlit secrets or environment variables.")
+#         st.stop()
 
 
 DB_HOST_OLD = st.secrets["database"]["host"]
@@ -384,7 +385,8 @@ User Query: "{user_query}"
             """.strip()
             
             with st.spinner("Processing query with AI..."):
-                response = openai.chat.completions.create(
+                # response = openai.chat.completions.create(
+                response = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant that extracts structured data from text. Always return valid JSON."},
