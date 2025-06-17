@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 from itertools import product
-import openai
+from openai import OpenAI
 import json
 import pymysql
 import os
@@ -352,6 +352,115 @@ if st.session_state.data_loaded and st.session_state.final_exploded_df is not No
     st.subheader("🔍 Extract Scheme Filters from Query")
     user_query = st.text_area("Enter your scheme-related query:", height=100)
     
+#     if st.button("🔍 Extract Filters") and user_query.strip():
+#         try:
+#             # Get unique values for prompting
+#             company_types = sorted(st.session_state.final_exploded_df['TYPE_STANDARDIZED'].unique().tolist())
+#             sector_types = sorted(st.session_state.final_exploded_df['focus_sector_standardized'].unique().tolist())
+#             scheme_types = sorted(st.session_state.final_exploded_df['type_of_scheme_final'].unique().tolist())
+            
+#             prompt = f"""
+# You are an intelligent assistant that extracts scheme filters from user queries.
+
+# Extract the following three fields from the user's query:
+# 1. company_type
+# 2. sector_type  
+# 3. scheme_type
+
+# You MUST map values from the user's query to ONLY the predefined categories below. If nothing matches, return an empty list for that field.
+
+# Available company_type options: {company_types}
+# Available sector_type options: {sector_types}
+# Available scheme_type options: {scheme_types}
+
+# Return ONLY a valid JSON object in this exact format:
+# {{
+#   "company_type": [],
+#   "sector_type": [],
+#   "scheme_type": []
+# }}
+
+# User Query: "{user_query}"
+#             """.strip()
+            
+#             with st.spinner("Processing query with AI..."):
+#                 response = openai.chat.completions.create(
+#                     model="gpt-4",
+#                     messages=[
+#                         {"role": "system", "content": "You are a helpful assistant that extracts structured data from text. Always return valid JSON."},
+#                         {"role": "user", "content": prompt}
+#                     ],
+#                     temperature=0.1,
+#                     max_tokens=500
+#                 )
+                
+#                 # Parse response
+#                 response_text = response.choices[0].message.content.strip()
+                
+#                 # Clean up response if it has markdown formatting
+#                 if response_text.startswith("```json"):
+#                     response_text = response_text.replace("```json", "").replace("```", "").strip()
+                
+#                 extracted_filters = json.loads(response_text)
+                
+#                 st.subheader("📌 Extracted Filters")
+#                 st.json(extracted_filters)
+                
+#                 # -------------------------------
+#                 # Filter DataFrame
+#                 # -------------------------------
+#                 filtered_df = st.session_state.final_exploded_df.copy()
+                
+#                 # Apply filters
+#                 if extracted_filters.get("company_type"):
+#                     filtered_df = filtered_df[filtered_df["TYPE_STANDARDIZED"].isin(extracted_filters["company_type"])]
+                
+#                 if extracted_filters.get("sector_type"):
+#                     filtered_df = filtered_df[filtered_df["focus_sector_standardized"].isin(extracted_filters["sector_type"])]
+                
+#                 if extracted_filters.get("scheme_type"):
+#                     filtered_df = filtered_df[filtered_df["type_of_scheme_final"].isin(extracted_filters["scheme_type"])]
+                
+#                 # Store filtered results in session state
+#                 st.session_state.filtered_results = filtered_df
+                
+#                 st.subheader("📊 Filtered Results")
+                
+#                 if not filtered_df.empty:
+#                     st.success(f"Found {len(filtered_df)} matching schemes")
+                    
+#                     # Show key columns first
+#                     key_columns = ['schemeName', 'TYPE_STANDARDIZED', 'focus_sector_standardized', 'type_of_scheme_final']
+#                     available_key_columns = [col for col in key_columns if col in filtered_df.columns]
+                    
+#                     if available_key_columns:
+#                         st.dataframe(filtered_df[available_key_columns], use_container_width=True)
+                    
+#                     # Option to show all columns - FIXED VERSION
+#                     show_all = st.checkbox("Show all columns", key="filtered_show_all_columns")
+#                     if show_all:
+#                         st.subheader("📋 Complete Filtered Dataset")
+#                         st.dataframe(filtered_df, use_container_width=True)
+                        
+#                     # Download option
+#                     csv = filtered_df.to_csv(index=False)
+#                     st.download_button(
+#                         label="📥 Download filtered results as CSV",
+#                         data=csv,
+#                         file_name="filtered_schemes.csv",
+#                         mime="text/csv"
+#                     )
+#                 else:
+#                     st.warning("No schemes match the extracted filters.")
+#                     st.session_state.filtered_results = None
+                    
+#         except json.JSONDecodeError as e:
+#             st.error(f"❌ Error parsing AI response: {e}")
+#             st.text("Raw AI Response:")
+#             st.code(response.choices[0].message.content)
+#         except Exception as e:
+#             st.error(f"❌ Error processing query: {e}")
+    
     if st.button("🔍 Extract Filters") and user_query.strip():
         try:
             # Get unique values for prompting
@@ -381,67 +490,74 @@ Return ONLY a valid JSON object in this exact format:
 }}
 
 User Query: "{user_query}"
-            """.strip()
-            
+        """.strip()
+        
             with st.spinner("Processing query with AI..."):
-                response = openai.chat.completions.create(
+                # Initialize OpenAI client explicitly with proxies=None for version 1.50.2
+                
+                client = OpenAI(
+                    api_key=st.secrets["api_keys"]["openai"],
+                    proxies=None  # Explicitly disable proxies to avoid the error
+                )
+
+                response = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
-                        {"role": "system", "content": "You are a helpful assistant that extracts structured data from text. Always return valid JSON."},
+                        {"role": "system", "content": "You are a helpful assistant that extracts structured data from text. Always  return valid JSON."},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.1,
                     max_tokens=500
                 )
-                
+
                 # Parse response
                 response_text = response.choices[0].message.content.strip()
-                
+
                 # Clean up response if it has markdown formatting
                 if response_text.startswith("```json"):
                     response_text = response_text.replace("```json", "").replace("```", "").strip()
-                
+
                 extracted_filters = json.loads(response_text)
-                
+
                 st.subheader("📌 Extracted Filters")
                 st.json(extracted_filters)
-                
+
                 # -------------------------------
                 # Filter DataFrame
                 # -------------------------------
                 filtered_df = st.session_state.final_exploded_df.copy()
-                
+
                 # Apply filters
                 if extracted_filters.get("company_type"):
                     filtered_df = filtered_df[filtered_df["TYPE_STANDARDIZED"].isin(extracted_filters["company_type"])]
-                
+
                 if extracted_filters.get("sector_type"):
                     filtered_df = filtered_df[filtered_df["focus_sector_standardized"].isin(extracted_filters["sector_type"])]
-                
+
                 if extracted_filters.get("scheme_type"):
                     filtered_df = filtered_df[filtered_df["type_of_scheme_final"].isin(extracted_filters["scheme_type"])]
-                
+
                 # Store filtered results in session state
                 st.session_state.filtered_results = filtered_df
-                
+
                 st.subheader("📊 Filtered Results")
-                
+
                 if not filtered_df.empty:
                     st.success(f"Found {len(filtered_df)} matching schemes")
-                    
+
                     # Show key columns first
                     key_columns = ['schemeName', 'TYPE_STANDARDIZED', 'focus_sector_standardized', 'type_of_scheme_final']
                     available_key_columns = [col for col in key_columns if col in filtered_df.columns]
-                    
+
                     if available_key_columns:
                         st.dataframe(filtered_df[available_key_columns], use_container_width=True)
-                    
+
                     # Option to show all columns - FIXED VERSION
                     show_all = st.checkbox("Show all columns", key="filtered_show_all_columns")
                     if show_all:
                         st.subheader("📋 Complete Filtered Dataset")
                         st.dataframe(filtered_df, use_container_width=True)
-                        
+
                     # Download option
                     csv = filtered_df.to_csv(index=False)
                     st.download_button(
@@ -453,14 +569,13 @@ User Query: "{user_query}"
                 else:
                     st.warning("No schemes match the extracted filters.")
                     st.session_state.filtered_results = None
-                    
+                
         except json.JSONDecodeError as e:
             st.error(f"❌ Error parsing AI response: {e}")
             st.text("Raw AI Response:")
-            st.code(response.choices[0].message.content)
+            st.code(response_text)  # Use response_text for consistency
         except Exception as e:
             st.error(f"❌ Error processing query: {e}")
-    
     # Show previously filtered results if they exist
     elif st.session_state.get('filtered_results') is not None and not st.session_state.filtered_results.empty:
         st.subheader("📊 Previous Filtered Results")
