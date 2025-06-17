@@ -501,11 +501,6 @@ User Query: "{user_query}"
         
             with st.spinner("Processing query with AI..."):
                 # Initialize OpenAI client explicitly with proxies=None for version 1.50.2
-                
-                client = OpenAI(
-                    api_key=st.secrets["OPEN_AI_KEY"],
-                    proxies=None  # Explicitly disable proxies to avoid the error
-                )
 
                 response = client.chat.completions.create(
                     model="gpt-4",
